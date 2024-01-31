@@ -1,4 +1,5 @@
 mod config;
+mod state;
 mod database;
 mod entry;
 mod app;
@@ -11,6 +12,7 @@ use database::{ensure_db_exists, connect_to_db, create_tables};
 use langtime::parse;
 use rusqlite::Connection;
 use anyhow::{Result, Context};
+use state::State;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, infer_subcommands=true)]
@@ -40,7 +42,9 @@ enum Subcommands {
 fn main() -> Result<()> {
     let config = Config::build();
 
-    let connection = setup(&config)?;
+    setup(&config)?;
+
+    let state = State::build(&config)?;
 
     let cli = Cli::parse();
 
@@ -54,10 +58,10 @@ fn main() -> Result<()> {
                 );
             }
 
-            start_task(task, target_time, &connection)?;
+            start_task(task, target_time, &state)?;
         },
         Subcommands::Out => {
-            stop_task(&connection)?;
+            stop_task(&state)?;
         },
         Subcommands::Display { json, current_month } => {
             display_tasks(json, current_month);
@@ -69,17 +73,17 @@ fn main() -> Result<()> {
             }
         },
         Subcommands::Current => {
-            current_task(&connection)?;
+            current_task(&state)?;
         }
     };
 
     Ok(())
 }
 
-fn setup(config: &Config) -> Result<Connection> {
+fn setup(config: &Config) -> Result<()> {
     let db = connect_to_db(config)?;
     ensure_db_exists(config)?;
     create_tables(&db)?;
 
-    Ok(db)
+    Ok(())
 }

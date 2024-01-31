@@ -3,10 +3,11 @@ use anyhow::Result;
 use rusqlite::Connection;
 use crate::database::{current_sheet, write_entry, current_entry};
 use crate::entry::Entry;
+use crate::state::State;
 use crate::utils::{time_from_now, format_duration};
 
-pub fn start_task(task: &str, at: Option<DateTime<Local>>, db: &Connection) -> Result<()> {
-    let current_sheet = current_sheet(db)?;
+pub fn start_task(task: &str, at: Option<DateTime<Local>>, state: &State) -> Result<()> {
+    let current_sheet = current_sheet(&state.database)?;
 
     let start = match at {
         Some(t) => t,
@@ -15,19 +16,19 @@ pub fn start_task(task: &str, at: Option<DateTime<Local>>, db: &Connection) -> R
 
     let entry = Entry::start(task, &current_sheet, start);
 
-    write_entry(&entry, db)?;
+    write_entry(&entry, &state.database)?;
 
     Ok(())
 }
 
-pub fn stop_task(db: &Connection) -> Result<()> {
-    let cur = current_entry(db)?;
+pub fn stop_task(state: &State) -> Result<()> {
+    let cur = current_entry(&state.database)?;
 
     match cur {
         None => println!("There is no active task."),
         Some(mut e) => {
             e.stop(Local::now());
-            write_entry(&e, db)?;
+            write_entry(&e, &state.database)?;
             println!("Checked out of sheet {}", e.sheet);
         }
     };
@@ -50,8 +51,8 @@ pub fn display_sheets() {
     todo!();
 }
 
-pub fn current_task(db: &Connection) -> Result<()> {
-    let entry = current_entry(db)?;
+pub fn current_task(state: &State) -> Result<()> {
+    let entry = current_entry(&state.database)?;
 
     match entry {
         None => println!("There is no active task."),
