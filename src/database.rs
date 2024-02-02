@@ -3,7 +3,9 @@ use std::str::FromStr;
 use rusqlite::{Connection, named_params};
 use anyhow::{Result, anyhow, Context};
 
-use crate::{entry::Entry, config::Config, utils::str_to_datetime};
+use crate::entry::Entry;
+use crate::config::Config;
+use crate::utils::str_to_datetime;
 
 pub fn connect_to_db(config: &Config) -> Result<Connection> {
     if let Ok(conn) = Connection::open(&config.database_file) {
@@ -120,6 +122,58 @@ pub fn current_entry(db: &Connection) -> Result<Option<Entry>> {
     Option::transpose(running_entry).context("Error while parsing the current entry")
 }
 
-pub fn current_sheet(db: &Connection) -> Result<String> {
-    Ok("default".to_string())
+pub fn get_all_entries(db: &Connection) -> Result<Vec<Entry>> {
+    let query = "
+    SELECT id, note, start, end, sheet FROM entries;
+    ";
+
+    let mut stmt = db.prepare(query)?;
+    let mut entries = stmt.query_map([], |row| {
+        let end = row.get::<usize, Option<String>>(3)?
+            .map(|t| str_to_datetime(&t).unwrap());
+
+        let start = str_to_datetime(&row.get::<usize, String>(2)?)
+            .unwrap();
+
+        Ok(Entry {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            start,
+            end,
+            sheet: row.get(4)?
+        })
+    })?;
+
+    let mut entries_vec = Vec::new();
+
+    for sheet in entries {
+        entries_vec.push(sheet?);
+    }
+
+    Ok(entries_vec)
+}
+
+pub fn get_sheet_entries(sheet: &str, db: &Connection) -> Result<Vec<Entry>> {
+    let entries = get_all_entries(db)?;
+
+    Ok(entries.iter().filter(|e| e.sheet == sheet).cloned().collect())
+}
+
+pub fn get_all_sheets(db: &Connection) -> Result<Vec<String>> {
+    let query = "
+    SELECT DISTINCT sheet FROM entries;
+    ";
+
+    let mut stmt = db.prepare(query)?;
+    let mut entries = stmt.query_map([], |row| {
+        row.get::<usize, String>(0)
+    })?;
+
+    let mut sheets = Vec::new();
+
+    for sheet in entries {
+        sheets.push(sheet?);
+    }
+
+    Ok(sheets)
 }
