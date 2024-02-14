@@ -2,7 +2,7 @@ use chrono::{DateTime, Local};
 use anyhow::Result;
 use colored::Colorize;
 
-use crate::database::{write_entry, current_entry, get_all_sheets, get_sheet_entries};
+use crate::database::{write_entry, current_entry, get_all_sheets, get_sheet_entries, remove_entry_by_id, remove_entries_by_sheet};
 use crate::entry::Entry;
 use crate::state::State;
 use crate::utils::{time_from_now, format_duration};
@@ -82,6 +82,15 @@ pub fn display_tasks_stdout(sheet: &str, entries: &Vec<Entry>, show_ids: &bool) 
     }
 }
 
+pub fn kill_task(id: &usize, state: &mut State) -> Result<()> {
+    remove_entry_by_id(id, &state.database)?;
+
+    println!("{} {}", "Removed entry:".bold(), id);
+
+    Ok(())
+}
+
+
 pub fn checkout_sheet(name: &str, state: &mut State) -> Result<()> {
     state.change_sheet(name)?;
 
@@ -103,6 +112,14 @@ pub fn display_sheets(state: &State) -> Result<()> {
             println!("{}", sheet);
         }
     }
+
+    Ok(())
+}
+
+pub fn kill_sheet(sheet: &str, state: &mut State) -> Result<()> {
+    remove_entries_by_sheet(sheet, &state.database)?;
+
+    println!("{} {}", "Removed sheet:".bold(), sheet);
 
     Ok(())
 }

@@ -119,7 +119,7 @@ pub fn current_entry(db: &Connection) -> Result<Option<Entry>> {
 
     let running_entry = entries.next();
 
-    Option::transpose(running_entry).context("Error while parsing the current entry")
+    running_entry.transpose().context("Error while parsing the current entry")
 }
 
 pub fn get_all_entries(db: &Connection) -> Result<Vec<Entry>> {
@@ -128,7 +128,7 @@ pub fn get_all_entries(db: &Connection) -> Result<Vec<Entry>> {
     ";
 
     let mut stmt = db.prepare(query)?;
-    let mut entries = stmt.query_map([], |row| {
+    let entries = stmt.query_map([], |row| {
         let end = row.get::<usize, Option<String>>(3)?
             .map(|t| str_to_datetime(&t).unwrap());
 
@@ -153,6 +153,44 @@ pub fn get_all_entries(db: &Connection) -> Result<Vec<Entry>> {
     Ok(entries_vec)
 }
 
+pub fn get_entry_by_id(id: usize, db: &Connection) -> Result<Option<Entry>> {
+    let query = "
+    SELECT id, note, start, end, sheet FROM entries WHERE id = ?;
+    ";
+
+    let mut stmt = db.prepare(query)?;
+    let mut entries = stmt.query_map([id], |row| {
+        let end = row.get::<usize, Option<String>>(3)?
+            .map(|t| str_to_datetime(&t).unwrap());
+
+        let start = str_to_datetime(&row.get::<usize, String>(2)?)
+            .unwrap();
+
+        Ok(Entry {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            start,
+            end,
+            sheet: row.get(4)?
+        })
+    })?;
+
+    let entry = entries.next();
+
+    entry.transpose().context("Error while parsing the current entry")
+}
+
+pub fn remove_entry_by_id(id: &usize, db: &Connection) -> Result<()> {
+    let query = "
+    DELETE FROM entries WHERE id = ?;
+    ";
+
+    let mut stmt = db.prepare(query)?;
+    stmt.execute([id])?;
+
+    Ok(())
+}
+
 pub fn get_sheet_entries(sheet: &str, db: &Connection) -> Result<Vec<Entry>> {
     let entries = get_all_entries(db)?;
 
@@ -165,7 +203,7 @@ pub fn get_all_sheets(db: &Connection) -> Result<Vec<String>> {
     ";
 
     let mut stmt = db.prepare(query)?;
-    let mut entries = stmt.query_map([], |row| {
+    let entries = stmt.query_map([], |row| {
         row.get::<usize, String>(0)
     })?;
 
@@ -176,4 +214,15 @@ pub fn get_all_sheets(db: &Connection) -> Result<Vec<String>> {
     }
 
     Ok(sheets)
+}
+
+pub fn remove_entries_by_sheet(sheet: &str, db: &Connection) -> Result<()> {
+    let query = "
+    DELETE FROM entries WHERE sheet = ?;
+    ";
+
+    let mut stmt = db.prepare(query)?;
+    stmt.execute([sheet])?;
+
+    Ok(())
 }

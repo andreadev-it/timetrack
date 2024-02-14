@@ -5,10 +5,8 @@ mod entry;
 mod app;
 mod utils;
 
-use std::usize;
-
-use app::{start_task, stop_task, display_tasks, checkout_sheet, display_sheets, current_task};
-use clap::{Parser, Subcommand};
+use app::*;
+use clap::{Parser, Subcommand, Args};
 use config::Config;
 use database::{ensure_db_exists, connect_to_db, create_tables};
 use langtime::parse;
@@ -55,10 +53,17 @@ enum Subcommands {
     },
     Current,
     Kill {
-        #[arg(long)]
-        id: Option<usize>,
-        sheet: String
+        #[command(flatten)]
+        kill_args: KillArgs
     }
+}
+
+#[derive(Args, Debug)]
+#[group(required = true, multiple = false)]
+struct KillArgs {
+    #[arg(long)]
+    id: Option<usize>,
+    sheet: Option<String>
 }
 
 fn main() -> Result<()> {
@@ -115,8 +120,13 @@ fn main() -> Result<()> {
         Subcommands::Edit { id, start, end, notes } => {
             todo!();
         },
-        Subcommands::Kill { id, sheet } => {
-            todo!();
+        Subcommands::Kill { kill_args } => {
+            if let Some(id) = &kill_args.id {
+                kill_task(&id, &mut state)?;
+            }
+            else if let Some(sheet) = &kill_args.sheet {
+                kill_sheet(&sheet, &mut state)?;
+            }
         }
     };
 
