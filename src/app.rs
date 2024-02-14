@@ -8,10 +8,7 @@ use crate::state::State;
 use crate::utils::{time_from_now, format_duration};
 
 pub fn start_task(task: &str, at: Option<DateTime<Local>>, state: &State) -> Result<()> {
-    let start = match at {
-        Some(t) => t,
-        None => Local::now()
-    };
+    let start = at.unwrap_or(Local::now());
 
     let entry = Entry::start(task, &state.current_sheet, start);
 
@@ -23,10 +20,7 @@ pub fn start_task(task: &str, at: Option<DateTime<Local>>, state: &State) -> Res
 }
 
 pub fn stop_task(at: Option<DateTime<Local>>, state: &mut State) -> Result<()> {
-    let end = match at {
-        Some(t) => t,
-        None => Local::now()
-    };
+    let end = at.unwrap_or(Local::now());
 
     let cur = current_entry(&state.database)?;
 
@@ -53,22 +47,38 @@ pub fn stop_task(at: Option<DateTime<Local>>, state: &mut State) -> Result<()> {
     Ok(())
 }
 
-pub fn display_tasks(print_json: &bool, month: &Option<String>, sheet: &Option<String>, state: &State) -> Result<()> {
+pub fn display_tasks(print_json: &bool, month: &Option<String>, sheet: &Option<String>, state: &State, ids: &bool) -> Result<()> {
     let sheet = sheet.as_ref().unwrap_or(&state.current_sheet);
 
     let entries = get_sheet_entries(sheet, &state.database)?;
 
-    display_tasks_stdout(sheet, &entries);
+    display_tasks_stdout(sheet, &entries, ids);
 
     Ok(())
 }
 
-pub fn display_tasks_stdout(sheet: &str, entries: &Vec<Entry>) {
-    println!("Timesheet: {}", sheet);
+pub fn display_tasks_stdout(sheet: &str, entries: &Vec<Entry>, show_ids: &bool) {
+    println!("{} {}", "Timesheet:".bold(), sheet);
 
-    println!("Date              Start      End       Duration    Notes");
+    let id_label = if *show_ids { format!("{:<6}", "ID") } else { "".to_string() };
+    let date_label = format!("{:<18}", "Date");
+    let start_label = format!("{:<11}", "Start");
+    let end_label = format!("{:<10}", "End");
+    let duration_label = format!("{:<12}", "Duration");
+    let notes_label = format!("Notes");
+
+    let full_label = format!("{}{}{}{}{}{}",
+        id_label,
+        date_label,
+        start_label,
+        end_label,
+        duration_label,
+        notes_label
+    );
+
+    println!("    {}", full_label.bold());
     for entry in entries {
-        println!("{}", entry.formatted());
+        println!("    {}", entry.formatted(show_ids));
     }
 }
 
@@ -87,7 +97,7 @@ pub fn display_sheets(state: &State) -> Result<()> {
 
     for sheet in sheets {
         if sheet == state.current_sheet {
-            println!("{} (active)", sheet.green().bold());
+            println!("{} {}", sheet, "(active)".green().bold());
         }
         else {
             println!("{}", sheet);

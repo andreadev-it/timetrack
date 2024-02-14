@@ -25,7 +25,7 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Subcommands {
     In { 
-        task: String, 
+        task: Option<String>, 
         #[arg(long)]
         at: Option<String> 
     },
@@ -38,6 +38,8 @@ enum Subcommands {
         json: bool,
         #[arg(long)]
         month: Option<String>,
+        #[arg(long)]
+        ids: bool,
         sheet: Option<String>
     },
     Sheet { name: Option<String> },
@@ -78,6 +80,10 @@ fn main() -> Result<()> {
                 );
             }
 
+            let task = task.as_ref();
+            let default_task = "".to_string();
+            let task = task.unwrap_or(&default_task);
+
             start_task(task, target_time, &state)?;
         },
         Subcommands::Out { at } => {
@@ -91,8 +97,8 @@ fn main() -> Result<()> {
 
             stop_task(target_time, &mut state)?;
         },
-        Subcommands::Display { json, month, sheet } => {
-            display_tasks(json, month, sheet, &state)?;
+        Subcommands::Display { json, month, sheet, ids } => {
+            display_tasks(json, month, sheet, &state, &ids)?;
         },
         Subcommands::Sheet { name } => {
             match name {

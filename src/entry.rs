@@ -43,11 +43,19 @@ impl Entry {
         end - self.start
     }
 
-    pub fn formatted(&self) -> String {
+    pub fn formatted(&self, show_id: &bool) -> String {
         let end = self.end.unwrap_or(Local::now());
 
+        let id = if *show_id {
+            // I can unwrap because all tasks are taken from the db and will have ids
+            format!("{:<6}", self.id.unwrap())
+        } else {
+            "".to_string()
+        };
+
         format!(
-            "{}  {} - {}  {:<10}  {}",
+            "{}{}  {} - {}  {:<10}  {}",
+            id,
             self.start.format("%a %b %d, %Y"),
             self.start.format("%H:%M:%S"),
             end.format("%H:%M:%S"),
@@ -56,12 +64,3 @@ impl Entry {
         )
     }
 }
-
-// #[derive(Debug, PartialEq, Eq)]
-// pub struct StringEntry {
-//     pub id: Option<usize>,
-//     pub start: String,
-//     pub end: Option<String>,
-//     pub name: String,
-//     pub sheet: String
-// }

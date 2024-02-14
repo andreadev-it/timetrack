@@ -307,9 +307,9 @@ dependencies = [
 
 [[package]]
 name = "langtime"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c612ebb42feffef6e2b33a1cfa02c10e699aec6e8398a08bcf7c9009bd382660"
+checksum = "093862b696cfae6522706db05628db4729a40a370c94df50ffc308ac07d2cb92"
 dependencies = [
  "chrono",
  "nom",
