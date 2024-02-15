@@ -2,16 +2,17 @@ mod config;
 mod state;
 mod database;
 mod entry;
-mod app;
 mod utils;
+mod commands;
 
-use app::*;
+use commands::*;
 use clap::{Parser, Subcommand, Args};
 use config::Config;
 use database::{ensure_db_exists, connect_to_db, create_tables};
 use langtime::parse;
 use anyhow::{Result, Context};
-use state::State;
+pub use state::State;
+pub use entry::Entry;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, infer_subcommands=true)]
@@ -35,9 +36,11 @@ enum Subcommands {
         #[arg(long)]
         json: bool,
         #[arg(short, long)]
-        month: Option<String>,
-        #[arg(short, long)]
         ids: bool,
+        #[arg(short, long)]
+        start: Option<String>,
+        #[arg(short, long)]
+        end: Option<String>,
         sheet: Option<String>
     },
     Sheet { name: Option<String> },
@@ -79,13 +82,9 @@ fn main() -> Result<()> {
 
     match &cli.command {
         Subcommands::In { task, at }=> {
-            let mut target_time = None;
-
-            if let Some(at) = at {
-                target_time = Some(
-                    parse(at).context("The specified time couldn't be recognized.")?
-                );
-            }
+            let target_time = at.as_ref()
+                .and_then(|at| Some(parse(&at)))
+                .transpose()?;
 
             let task = task.as_ref();
             let default_task = "".to_string();
@@ -94,27 +93,30 @@ fn main() -> Result<()> {
             start_task(task, target_time, &state)?;
         },
         Subcommands::Out { at } => {
-            let mut target_time = None;
-
-            if let Some(at) = at {
-                target_time = Some(
-                    parse(at).context("The specified time couldn't be recognized.")?
-                );
-            }
+            let target_time = at.as_ref()
+                .and_then(|at| Some(parse(&at)))
+                .transpose()?;
 
             stop_task(target_time, &mut state)?;
         },
-        Subcommands::Display { json, month, sheet, ids } => {
-            display_tasks(json, month, sheet, &state, &ids)?;
+        Subcommands::Display { json, sheet, start, end, ids } => {
+            display_tasks(
+                json,
+                sheet.as_ref(),
+                start.as_ref(),
+                end.as_ref(),
+                &ids,
+                &state
+            )?;
         },
         Subcommands::Sheet { name } => {
             match name {
                 Some(s) => checkout_sheet(s, &mut state)?,
-                None => display_sheets(&state)?
+                None => list_sheets(&state)?
             }
         },
         Subcommands::List => {
-            display_sheets(&state)?;
+            list_sheets(&state)?;
         },
         Subcommands::Current => {
             current_task(&state)?;
