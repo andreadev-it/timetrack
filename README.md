@@ -10,24 +10,12 @@ include the most used commands and both a user-friendly output
 and a JSON output that can be piped into other commands or
 applications.
 
-I'm going to use the philsophy: "make it work, make it right, make it fast".
-
-## Things that work
+## Things that work, but might be incomplete
 - [x] `t in [--at] [TASK]`
 - [x] `t out [--at]`
 - [x] `t current`
-- [~] `t display [--json] [--start] [--end]`
+- [x] `t display [--json] [--start] [--end]`
 - [x] `t sheet [name]`
 - [x] `t list`
-- [ ] `t edit [--id] [--start] [--end] [--move] [NOTES]`
-- [ ] `t kill [--id] [TIMESHEET]`
-
-## Refactored
-- [ ] `t in [--at] [TASK]`
-- [ ] `t out [--at]`
-- [ ] `t now`
-- [ ] `t display [--json] [--start] [--end]`
-- [ ] `t sheet [name]`
-- [ ] `t list`
-- [ ] `t edit [--id] [--start] [--end] [--move] [NOTES]`
-- [ ] `t kill [--id] [TIMESHEET]`
+- [x] `t edit [--id] [--start] [--end] [--move] [NOTES]`
+- [x] `t kill [--id] [TIMESHEET]`
