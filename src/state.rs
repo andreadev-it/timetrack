@@ -82,7 +82,7 @@ impl State {
             data_file.push("data.txt");
 
             let last_task = self.last_task  
-                .and_then(|t| Some(t.to_string()))
+                .map(|t| t.to_string())
                 .unwrap_or("".to_string());
 
             fs::write(

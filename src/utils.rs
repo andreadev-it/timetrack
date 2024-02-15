@@ -39,8 +39,8 @@ pub fn get_month_boundaries(month: &str) -> Result<(DateTime<Local>, DateTime<Lo
 
 // The month is written as 2024-01
 pub fn get_month_from_string(month_str: &str) -> Result<DateTime<Local>> {
-    let year = month_str.split("-").nth(0).unwrap().parse::<i32>().unwrap();
-    let month = month_str.split("-").nth(1).unwrap().parse::<u32>().unwrap();
+    let year = month_str.split('-').next().unwrap().parse::<i32>().unwrap();
+    let month = month_str.split('-').nth(1).unwrap().parse::<u32>().unwrap();
 
     let res = Local.with_ymd_and_hms(year, month, 1, 0, 0, 0);
 
@@ -48,6 +48,16 @@ pub fn get_month_from_string(month_str: &str) -> Result<DateTime<Local>> {
         chrono::LocalResult::None => Err(anyhow::anyhow!("Invalid month")),
         chrono::LocalResult::Single(dt) => Ok(dt),
         chrono::LocalResult::Ambiguous(_, _) => Err(anyhow::anyhow!("Ambiguous month")),
+    }
+}
+
+pub fn get_first_day_of_month(dt: DateTime<Local>) -> Result<DateTime<Local>> {
+    let res = Local.with_ymd_and_hms(dt.year(), dt.month(), 1, 0, 0, 0);
+
+    match res {
+        LocalResult::None => Err(anyhow::anyhow!("Invalid month")),
+        LocalResult::Single(dt) => Ok(dt),
+        LocalResult::Ambiguous(_, _) => Err(anyhow::anyhow!("Ambiguous month")),
     }
 }
 
@@ -68,6 +78,15 @@ pub fn get_last_day_of_month(dt: DateTime<Local>) -> Result<DateTime<Local>> {
         LocalResult::Ambiguous(_, _) => Err(anyhow::anyhow!("Ambiguous month")),
     }
 }
+
+pub fn day_begin(dt: DateTime<Local>) -> DateTime<Local> {
+    Local.with_ymd_and_hms(dt.year(), dt.month(), dt.day(), 0, 0, 0).unwrap()
+}
+
+pub fn day_end(dt: DateTime<Local>) -> DateTime<Local> {
+    Local.with_ymd_and_hms(dt.year(), dt.month(), dt.day(), 23, 59, 59).unwrap()
+}
+
 
 mod tests {
     use super::*;

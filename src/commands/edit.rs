@@ -3,6 +3,7 @@ use langtime::parse;
 use colored::Colorize;
 
 use crate::State;
+use crate::commands::display::{print_tasks_heading, ReadableOptions, print_task_readable};
 use crate::database::{get_entry_by_id, current_entry, update_entry};
 
 pub fn edit_task(
@@ -11,7 +12,7 @@ pub fn edit_task(
     end: &Option<String>,
     move_to: &Option<String>,
     notes: &Option<String>,
-    state: &State
+    state: &mut State
 ) -> Result<()> {
 
     let running_entry = current_entry(&state.database)?;
@@ -46,8 +47,16 @@ pub fn edit_task(
 
     update_entry(&entry, &state.database)?;
 
+    // Display output
     println!("{}", "Entry updated:".bold());
-    println!("{}", entry.formatted(&false));
+
+    let options = ReadableOptions {
+        show_ids: true,
+        padding: 0
+    };
+
+    print_tasks_heading(&options);
+    print_task_readable(&entry, &options);
 
     Ok(())
 }
