@@ -24,31 +24,33 @@ struct Cli {
 enum Subcommands {
     In { 
         task: Option<String>, 
-        #[arg(long)]
+        #[arg(short, long)]
         at: Option<String> 
     },
     Out {
-        #[arg(long)]
+        #[arg(short, long)]
         at: Option<String>
     },
     Display {
         #[arg(long)]
         json: bool,
-        #[arg(long)]
+        #[arg(short, long)]
         month: Option<String>,
-        #[arg(long)]
+        #[arg(short, long)]
         ids: bool,
         sheet: Option<String>
     },
     Sheet { name: Option<String> },
     List,
     Edit {
-        #[arg(long)]
-        id: usize,
-        #[arg(long)]
+        #[arg(short, long)]
+        id: Option<usize>,
+        #[arg(short, long)]
         start: Option<String>,
-        #[arg(long)]
+        #[arg(short, long)]
         end: Option<String>,
+        #[arg(short, long)]
+        move_to: Option<String>,
         notes: Option<String>
     },
     Current,
@@ -117,8 +119,8 @@ fn main() -> Result<()> {
         Subcommands::Current => {
             current_task(&state)?;
         },
-        Subcommands::Edit { id, start, end, notes } => {
-            todo!();
+        Subcommands::Edit { id, start, end, move_to, notes } => {
+            edit_task(id, start, end, move_to, notes, &mut state)?;
         },
         Subcommands::Kill { kill_args } => {
             if let Some(id) = &kill_args.id {

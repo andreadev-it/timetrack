@@ -153,7 +153,7 @@ pub fn get_all_entries(db: &Connection) -> Result<Vec<Entry>> {
     Ok(entries_vec)
 }
 
-pub fn get_entry_by_id(id: usize, db: &Connection) -> Result<Option<Entry>> {
+pub fn get_entry_by_id(id: &usize, db: &Connection) -> Result<Option<Entry>> {
     let query = "
     SELECT id, note, start, end, sheet FROM entries WHERE id = ?;
     ";

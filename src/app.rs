@@ -1,8 +1,9 @@
 use chrono::{DateTime, Local};
 use anyhow::Result;
 use colored::Colorize;
+use langtime::parse;
 
-use crate::database::{write_entry, current_entry, get_all_sheets, get_sheet_entries, remove_entry_by_id, remove_entries_by_sheet};
+use crate::database::{write_entry, current_entry, get_all_sheets, get_sheet_entries, remove_entry_by_id, remove_entries_by_sheet, get_entry_by_id, update_entry};
 use crate::entry::Entry;
 use crate::state::State;
 use crate::utils::{time_from_now, format_duration};
@@ -135,6 +136,53 @@ pub fn current_task(state: &State) -> Result<()> {
             println!("{} ({})", e.name.cyan(), format_duration(&elapsed));
         }
     }
+
+    Ok(())
+}
+
+pub fn edit_task(
+    id: &Option<usize>,
+    start: &Option<String>,
+    end: &Option<String>,
+    move_to: &Option<String>,
+    notes: &Option<String>,
+    state: &State
+) -> Result<()> {
+
+    let running_entry = current_entry(&state.database)?;
+
+    let entry = if let Some(id) = id {
+        get_entry_by_id(id, &state.database)?
+    } else { None };
+
+    if running_entry.is_none() && entry.is_none() {
+        println!("There is no active task, and no id was given.");
+        return Ok(());
+    }
+
+    // This will be fine because of the preceding if statement
+    let mut entry = entry.unwrap_or_else(|| running_entry.unwrap());
+
+    if let Some(start) = start {
+        entry.start = parse(start)?;
+    }
+
+    if let Some(end) = end {
+        entry.end = Some(parse(end)?);
+    }
+
+    if let Some(move_to) = move_to {
+        entry.sheet = move_to.to_string();
+    }
+
+    if let Some(notes) = notes {
+        entry.name = notes.to_string();
+    }
+
+    update_entry(&entry, &state.database)?;
+
+    println!("{}", "Entry updated:".bold());
+    println!("{}", entry.formatted(&false));
 
     Ok(())
 }
