@@ -1,9 +1,8 @@
 use anyhow::Result;
 use colored::Colorize;
 
-use crate::State;
 use crate::database::get_all_sheets;
-
+use crate::State;
 
 pub fn list_sheets(state: &State) -> Result<()> {
     println!("{}", "Timesheets:".bold());
@@ -13,8 +12,7 @@ pub fn list_sheets(state: &State) -> Result<()> {
     for sheet in sheets {
         if sheet == state.current_sheet {
             println!("{} {}", sheet, "(active)".green().bold());
-        }
-        else {
+        } else {
             println!("{}", sheet);
         }
     }

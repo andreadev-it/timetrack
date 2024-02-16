@@ -1,9 +1,9 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
 
+use crate::database::write_entry;
 use crate::Entry;
 use crate::State;
-use crate::database::write_entry;
 
 pub fn start_task(task: &str, at: Option<DateTime<Local>>, state: &State) -> Result<()> {
     let start = at.unwrap_or(Local::now());

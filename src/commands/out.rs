@@ -1,8 +1,8 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
 
-use crate::State;
 use crate::database::{current_entry, write_entry};
+use crate::State;
 
 pub fn stop_task(at: Option<DateTime<Local>>, state: &mut State) -> Result<()> {
     let end = at.unwrap_or(Local::now());

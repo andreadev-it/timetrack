@@ -1,12 +1,5 @@
-use chrono::{
-    NaiveDateTime,
-    DateTime,
-    Local,
-    TimeZone,
-    Duration,
-    LocalResult, Datelike
-};
 use anyhow::Result;
+use chrono::{DateTime, Datelike, Duration, Local, LocalResult, NaiveDateTime, TimeZone};
 
 pub fn str_to_datetime(s: &str) -> Result<DateTime<Local>> {
     let no_tz = s.replace("+00:00", "");
@@ -80,17 +73,20 @@ pub fn get_last_day_of_month(dt: DateTime<Local>) -> Result<DateTime<Local>> {
 }
 
 pub fn day_begin(dt: DateTime<Local>) -> DateTime<Local> {
-    Local.with_ymd_and_hms(dt.year(), dt.month(), dt.day(), 0, 0, 0).unwrap()
+    Local
+        .with_ymd_and_hms(dt.year(), dt.month(), dt.day(), 0, 0, 0)
+        .unwrap()
 }
 
 pub fn day_end(dt: DateTime<Local>) -> DateTime<Local> {
-    Local.with_ymd_and_hms(dt.year(), dt.month(), dt.day(), 23, 59, 59).unwrap()
+    Local
+        .with_ymd_and_hms(dt.year(), dt.month(), dt.day(), 23, 59, 59)
+        .unwrap()
 }
 
 pub fn is_same_day(dt1: &DateTime<Local>, dt2: &DateTime<Local>) -> bool {
     dt1.year() == dt2.year() && dt1.month() == dt2.month() && dt1.day() == dt2.day()
 }
-
 
 mod tests {
     use super::*;
@@ -101,40 +97,24 @@ mod tests {
         let dt = Local.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap();
         let res = get_last_day_of_month(dt).unwrap();
 
-        assert!(
-            res.year() == 2024 &&
-            res.month() == 1 &&
-            res.day() == 31
-        );
+        assert!(res.year() == 2024 && res.month() == 1 && res.day() == 31);
 
         // Leap year
         let dt = Local.with_ymd_and_hms(2024, 2, 1, 0, 0, 0).unwrap();
         let res = get_last_day_of_month(dt).unwrap();
 
-        assert!(
-            res.year() == 2024 &&
-            res.month() == 2 &&
-            res.day() == 29
-        );
+        assert!(res.year() == 2024 && res.month() == 2 && res.day() == 29);
 
         // December (year boundary)
         let dt = Local.with_ymd_and_hms(2024, 12, 1, 0, 0, 0).unwrap();
         let res = get_last_day_of_month(dt).unwrap();
 
-        assert!(
-            res.year() == 2024 &&
-            res.month() == 12 &&
-            res.day() == 31
-        );
+        assert!(res.year() == 2024 && res.month() == 12 && res.day() == 31);
 
         // Non-leap February
         let dt = Local.with_ymd_and_hms(2023, 2, 1, 0, 0, 0).unwrap();
         let res = get_last_day_of_month(dt).unwrap();
 
-        assert!(
-            res.year() == 2023 &&
-            res.month() == 2 &&
-            res.day() == 28
-        );
+        assert!(res.year() == 2023 && res.month() == 2 && res.day() == 28);
     }
 }

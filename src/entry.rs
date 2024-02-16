@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, Duration};
+use chrono::{DateTime, Duration, Local};
 use serde::Serialize;
 
 use crate::config::Config;
@@ -9,7 +9,7 @@ pub struct Entry {
     pub start: DateTime<Local>,
     pub end: Option<DateTime<Local>>,
     pub name: String,
-    pub sheet: String
+    pub sheet: String,
 }
 
 impl Entry {
@@ -19,7 +19,7 @@ impl Entry {
             start: Local::now(),
             end: None,
             name: "".to_string(),
-            sheet: config.default_sheet.clone()
+            sheet: config.default_sheet.clone(),
         }
     }
 
@@ -29,7 +29,7 @@ impl Entry {
             start,
             end: None,
             name: name.to_string(),
-            sheet: sheet.to_string()
+            sheet: sheet.to_string(),
         }
     }
 

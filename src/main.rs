@@ -1,21 +1,21 @@
+mod commands;
 mod config;
-mod state;
 mod database;
 mod entry;
+mod state;
 mod utils;
-mod commands;
 
-use commands::*;
-use clap::{Parser, Subcommand, Args};
-use config::Config;
-use database::{ensure_db_exists, connect_to_db, create_tables};
-use langtime::parse;
 use anyhow::Result;
-pub use state::State;
+use clap::{Args, Parser, Subcommand};
+use commands::*;
+use config::Config;
+use database::{connect_to_db, create_tables, ensure_db_exists};
 pub use entry::Entry;
+use langtime::parse;
+pub use state::State;
 
 #[derive(Parser, Debug)]
-#[command(author, version, about, infer_subcommands=true)]
+#[command(author, version, about, infer_subcommands = true)]
 struct Cli {
     #[command(subcommand)]
     command: Subcommands,
@@ -23,14 +23,14 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Subcommands {
-    In { 
-        task: Option<String>, 
+    In {
+        task: Option<String>,
         #[arg(short, long)]
-        at: Option<String> 
+        at: Option<String>,
     },
     Out {
         #[arg(short, long)]
-        at: Option<String>
+        at: Option<String>,
     },
     Display {
         #[arg(long)]
@@ -41,9 +41,11 @@ enum Subcommands {
         start: Option<String>,
         #[arg(short, long)]
         end: Option<String>,
-        sheet: Option<String>
+        sheet: Option<String>,
     },
-    Sheet { name: Option<String> },
+    Sheet {
+        name: Option<String>,
+    },
     List,
     Edit {
         #[arg(short, long)]
@@ -54,13 +56,13 @@ enum Subcommands {
         end: Option<String>,
         #[arg(short, long)]
         move_to: Option<String>,
-        notes: Option<String>
+        notes: Option<String>,
     },
     Current,
     Kill {
         #[command(flatten)]
-        kill_args: KillArgs
-    }
+        kill_args: KillArgs,
+    },
 }
 
 #[derive(Args, Debug)]
@@ -68,7 +70,7 @@ enum Subcommands {
 struct KillArgs {
     #[arg(long)]
     id: Option<usize>,
-    sheet: Option<String>
+    sheet: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -81,54 +83,59 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Subcommands::In { task, at }=> {
-            let target_time = at.as_ref()
-                .map(|at| parse(at))
-                .transpose()?;
+        Subcommands::In { task, at } => {
+            let target_time = at.as_ref().map(|at| parse(at)).transpose()?;
 
             let task = task.as_ref();
             let default_task = "".to_string();
             let task = task.unwrap_or(&default_task);
 
             start_task(task, target_time, &state)?;
-        },
+        }
         Subcommands::Out { at } => {
-            let target_time = at.as_ref()
-                .map(|at| parse(at))
-                .transpose()?;
+            let target_time = at.as_ref().map(|at| parse(at)).transpose()?;
 
             stop_task(target_time, &mut state)?;
-        },
-        Subcommands::Display { json, sheet, start, end, ids } => {
+        }
+        Subcommands::Display {
+            json,
+            sheet,
+            start,
+            end,
+            ids,
+        } => {
             display_tasks(
                 json,
                 sheet.as_ref(),
                 start.as_ref(),
                 end.as_ref(),
                 ids,
-                &state
+                &state,
             )?;
-        },
-        Subcommands::Sheet { name } => {
-            match name {
-                Some(s) => checkout_sheet(s, &mut state)?,
-                None => list_sheets(&state)?
-            }
+        }
+        Subcommands::Sheet { name } => match name {
+            Some(s) => checkout_sheet(s, &mut state)?,
+            None => list_sheets(&state)?,
         },
         Subcommands::List => {
             list_sheets(&state)?;
-        },
+        }
         Subcommands::Current => {
             current_task(&state)?;
-        },
-        Subcommands::Edit { id, start, end, move_to, notes } => {
+        }
+        Subcommands::Edit {
+            id,
+            start,
+            end,
+            move_to,
+            notes,
+        } => {
             edit_task(id, start, end, move_to, notes, &mut state)?;
-        },
+        }
         Subcommands::Kill { kill_args } => {
             if let Some(id) = &kill_args.id {
                 kill_task(id, &mut state)?;
-            }
-            else if let Some(sheet) = &kill_args.sheet {
+            } else if let Some(sheet) = &kill_args.sheet {
                 kill_sheet(sheet, &mut state)?;
             }
         }

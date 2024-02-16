@@ -1,10 +1,10 @@
 use anyhow::Result;
-use langtime::parse;
 use colored::Colorize;
+use langtime::parse;
 
+use crate::commands::display::{print_task_readable, print_tasks_heading, ReadableOptions};
+use crate::database::{current_entry, get_entry_by_id, update_entry};
 use crate::State;
-use crate::commands::display::{print_tasks_heading, ReadableOptions, print_task_readable};
-use crate::database::{get_entry_by_id, current_entry, update_entry};
 
 pub fn edit_task(
     id: &Option<usize>,
@@ -12,14 +12,15 @@ pub fn edit_task(
     end: &Option<String>,
     move_to: &Option<String>,
     notes: &Option<String>,
-    state: &mut State
+    state: &mut State,
 ) -> Result<()> {
-
     let running_entry = current_entry(&state.database)?;
 
     let entry = if let Some(id) = id {
         get_entry_by_id(id, &state.database)?
-    } else { None };
+    } else {
+        None
+    };
 
     if running_entry.is_none() && entry.is_none() {
         println!("There is no active task, and no id was given.");

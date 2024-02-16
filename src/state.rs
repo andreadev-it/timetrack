@@ -1,16 +1,16 @@
-use std::fs;
+use anyhow::Result;
 use directories::ProjectDirs;
 use rusqlite::Connection;
-use anyhow::Result;
+use std::fs;
 
-use crate::database::connect_to_db;
 use crate::config::Config;
+use crate::database::connect_to_db;
 
 #[derive(Debug)]
 pub struct State {
     pub current_sheet: String,
     pub last_task: Option<usize>,
-    pub database: Connection
+    pub database: Connection,
 }
 
 impl State {
@@ -37,21 +37,18 @@ impl State {
                         sheet = s.to_string();
                     }
 
-                    last_task = lines
-                        .next()
-                        .and_then(|id| id.parse().ok());
-                },
+                    last_task = lines.next().and_then(|id| id.parse().ok());
+                }
                 Err(_) => {
                     // write the default file
                     fs::write(&data_file, format!("{}\n", &sheet))?;
                 }
-
             }
 
             return Ok(State {
                 current_sheet: sheet,
                 last_task,
-                database: db
+                database: db,
             });
         }
 
@@ -60,7 +57,7 @@ impl State {
 
     pub fn change_sheet(&mut self, sheet: &str) -> Result<()> {
         self.current_sheet = sheet.to_string();
-        
+
         self.update_file()?;
 
         Ok(())
@@ -81,18 +78,12 @@ impl State {
             let mut data_file = data_dir.to_path_buf();
             data_file.push("data.txt");
 
-            let last_task = self.last_task  
+            let last_task = self
+                .last_task
                 .map(|t| t.to_string())
                 .unwrap_or("".to_string());
 
-            fs::write(
-                &data_file,
-                format!(
-                    "{}\n{}",
-                    self.current_sheet,
-                    last_task
-                ),
-            )?;
+            fs::write(&data_file, format!("{}\n{}", self.current_sheet, last_task))?;
         }
 
         Ok(())

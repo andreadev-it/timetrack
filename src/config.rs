@@ -5,7 +5,7 @@ use directories::ProjectDirs;
 #[derive(Debug)]
 pub struct Config {
     pub database_file: String,
-    pub default_sheet: String
+    pub default_sheet: String,
 }
 
 impl Config {
@@ -19,8 +19,8 @@ impl Config {
             if let Some(db_file_str) = db_file.to_str() {
                 return Config {
                     database_file: db_file_str.to_string(),
-                    default_sheet: "default".to_string()
-                }
+                    default_sheet: "default".to_string(),
+                };
             }
 
             panic!("Seems like the path contains invalid unicode. Please forward this to the developer. The path was: {:?}", db_file);
