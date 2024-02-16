@@ -87,6 +87,10 @@ pub fn day_end(dt: DateTime<Local>) -> DateTime<Local> {
     Local.with_ymd_and_hms(dt.year(), dt.month(), dt.day(), 23, 59, 59).unwrap()
 }
 
+pub fn is_same_day(dt1: &DateTime<Local>, dt2: &DateTime<Local>) -> bool {
+    dt1.year() == dt2.year() && dt1.month() == dt2.month() && dt1.day() == dt2.day()
+}
+
 
 mod tests {
     use super::*;

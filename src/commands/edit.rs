@@ -50,13 +50,10 @@ pub fn edit_task(
     // Display output
     println!("{}", "Entry updated:".bold());
 
-    let options = ReadableOptions {
-        show_ids: true,
-        padding: 0
-    };
+    let options = ReadableOptions::new();
 
     print_tasks_heading(&options);
-    print_task_readable(&entry, &options);
+    print_task_readable(&entry, true, &options);
 
     Ok(())
 }

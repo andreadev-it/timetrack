@@ -1,8 +1,9 @@
 use chrono::{DateTime, Local, Duration};
+use serde::Serialize;
 
 use crate::config::Config;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct Entry {
     pub id: Option<usize>,
     pub start: DateTime<Local>,
