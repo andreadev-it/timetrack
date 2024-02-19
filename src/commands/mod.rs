@@ -6,6 +6,7 @@ mod kill;
 mod list;
 mod out;
 mod sheet;
+mod month;
 
 pub use current::current_task;
 pub use display::display_tasks;
@@ -15,3 +16,4 @@ pub use kill::{kill_sheet, kill_task};
 pub use list::list_sheets;
 pub use out::stop_task;
 pub use sheet::checkout_sheet;
+pub use month::display_month;

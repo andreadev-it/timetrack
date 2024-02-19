@@ -1,5 +1,4 @@
 use anyhow::Result;
-use colored::Colorize;
 
 use crate::database::current_entry;
 use crate::style::{style_string, Styles};

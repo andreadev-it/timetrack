@@ -1,6 +1,5 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
-use colored::Colorize;
 
 use crate::database::current_entry;
 use crate::database::write_entry;

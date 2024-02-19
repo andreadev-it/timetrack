@@ -1,5 +1,4 @@
 use anyhow::Result;
-use colored::Colorize;
 
 use crate::database::{remove_entries_by_sheet, remove_entry_by_id, get_all_sheets, get_entry_by_id};
 use crate::State;

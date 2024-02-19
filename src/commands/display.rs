@@ -1,6 +1,5 @@
 use anyhow::Result;
-use chrono::Duration;
-use colored::Colorize;
+use chrono::{Duration, DateTime, Local};
 use langtime::parse;
 use serde_json::to_string_pretty;
 
@@ -43,8 +42,8 @@ impl ReadableOptions {
 pub fn display_tasks(
     print_json: &bool,
     sheet: Option<&String>,
-    start: Option<&String>,
-    end: Option<&String>,
+    start: Option<DateTime<Local>>,
+    end: Option<DateTime<Local>>,
     filter_by_date: &bool,
     ids: &bool,
     state: &State,
@@ -57,9 +56,8 @@ pub fn display_tasks(
     entries.sort_by(|a, b| a.start.cmp(&b.start));
 
     // Filtering
-    let mut start = start.map(|s| parse(s)).transpose()?.map(day_begin);
-
-    let mut end = end.map(|e| parse(e)).transpose()?.map(day_end);
+    let mut start = start;
+    let mut end = end;
 
     if *filter_by_date {
         start = start.map(day_begin);

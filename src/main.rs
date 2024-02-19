@@ -48,6 +48,15 @@ enum Subcommands {
         filter_by_date: bool,
         sheet: Option<String>,
     },
+    Month {
+        #[arg(long)]
+        json: bool,
+        #[arg(short, long)]
+        ids: bool,
+        #[arg(short, long)]
+        month: Option<String>,
+        sheet: Option<String>
+    },
     Sheet {
         name: Option<String>,
     },
@@ -127,11 +136,20 @@ fn cli() -> Result<()> {
             display_tasks(
                 json,
                 sheet.as_ref(),
-                start.as_ref(),
-                end.as_ref(),
+                start.as_ref().map(|s| parse(s)).transpose()?,
+                end.as_ref().map(|e| parse(e)).transpose()?,
                 filter_by_date,
                 ids,
                 &state,
+            )?;
+        },
+        Subcommands::Month { json, ids, month, sheet } => {
+            display_month(
+                json,
+                ids,
+                month.as_ref(),
+                sheet.as_ref(),
+                &mut state
             )?;
         }
         Subcommands::Sheet { name } => match name {
@@ -140,10 +158,10 @@ fn cli() -> Result<()> {
         },
         Subcommands::List => {
             list_sheets(&state)?;
-        }
+        },
         Subcommands::Current => {
             current_task(&state)?;
-        }
+        },
         Subcommands::Edit {
             id,
             start,
@@ -152,7 +170,7 @@ fn cli() -> Result<()> {
             notes,
         } => {
             edit_task(id, start, end, move_to, notes, &mut state)?;
-        }
+        },
         Subcommands::Kill { kill_args } => {
             if let Some(id) = &kill_args.id {
                 kill_task(id, &mut state)?;
