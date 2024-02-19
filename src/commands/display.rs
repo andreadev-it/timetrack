@@ -52,6 +52,15 @@ pub fn display_tasks(
     let sheet = sheet.unwrap_or(&state.current_sheet);
     let mut entries = get_sheet_entries(sheet, &state.database)?;
 
+    if entries.is_empty() {
+        println!(
+            "{} {}",
+            style_string("No sheet found with name:", Styles::Message),
+            sheet
+        );
+        return Ok(())
+    }
+
     // Sorting
     entries.sort_by(|a, b| a.start.cmp(&b.start));
 
@@ -117,7 +126,7 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
         prev_date = Some(&entry.start);
 
         if print_partial && options.show_partial_sum {
-            println!("{:<47}{}", "", format_duration(&day_sum));
+            println!("{:<49}{}", "", format_duration(&day_sum));
             day_sum = Duration::zero();
         }
 

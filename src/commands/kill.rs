@@ -49,7 +49,7 @@ pub fn kill_sheet(sheet: &str, state: &mut State) -> Result<()> {
         return Ok(());
     }
 
-    if !confirm_action("Are you sure you want to remove sheet {sheet}?") {
+    if !confirm_action(&format!("Are you sure you want to remove sheet {}?", sheet)) {
         return Ok(());
     }
 

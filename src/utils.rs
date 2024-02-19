@@ -89,7 +89,7 @@ pub fn is_same_day(dt1: &DateTime<Local>, dt2: &DateTime<Local>) -> bool {
 }
 
 pub fn confirm_action(msg: &str) -> bool {
-    println!("{}", msg);
+    println!("{} ", msg);
     let mut input = String::new();
     std::io::stdin().read_line(&mut input).unwrap();
     input.trim().to_lowercase() == "y"
