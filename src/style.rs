@@ -14,6 +14,6 @@ pub fn style_string(label: &str, style: Styles) -> ColoredString {
         Styles::Title => label.bold(),
         Styles::Message => label.bold(),
         Styles::Primary => label.green().bold(),
-        Styles::Secondary => label.blue(),
+        Styles::Secondary => label.cyan(),
     }
 }
