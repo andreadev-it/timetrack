@@ -3,6 +3,7 @@ use colored::Colorize;
 
 use crate::database::{remove_entries_by_sheet, remove_entry_by_id, get_all_sheets, get_entry_by_id};
 use crate::State;
+use crate::style::{style_string, Styles};
 use crate::utils::confirm_action;
 
 pub fn kill_task(id: &usize, state: &mut State) -> Result<()> {
@@ -11,7 +12,11 @@ pub fn kill_task(id: &usize, state: &mut State) -> Result<()> {
 
     // Guard for non-existent entries
     if entry.is_none() {
-        println!("{} {}", "Entry not found. Id:".bold(), id);
+        println!(
+            "{} {}",
+            style_string("Entry not found. Id:", Styles::Message),
+            id
+        );
         return Ok(());
     }
 
@@ -23,7 +28,11 @@ pub fn kill_task(id: &usize, state: &mut State) -> Result<()> {
 
     remove_entry_by_id(id, &state.database)?;
 
-    println!("{} {}", "Removed entry:".bold(), id);
+    println!(
+        "{} {}",
+        style_string("Removed entry:", Styles::Message),
+        id
+    );
 
     Ok(())
 }
@@ -33,7 +42,11 @@ pub fn kill_sheet(sheet: &str, state: &mut State) -> Result<()> {
 
     // Guard for non-existent sheets
     if !sheets.iter().any(|s| s == sheet) {
-        println!("{} {}", "Sheet not found:".bold(), sheet);
+        println!(
+            "{} {}",
+            style_string("Sheet not found:", Styles::Message),
+            sheet
+        );
         return Ok(());
     }
 
@@ -47,7 +60,11 @@ pub fn kill_sheet(sheet: &str, state: &mut State) -> Result<()> {
         move_to_last_sheet(state)?;
     }
 
-    println!("{} {}", "Removed sheet:".bold(), sheet);
+    println!(
+        "{} {}",
+        style_string("Removed sheet:", Styles::Message),
+        sheet
+    );
 
     Ok(())
 }

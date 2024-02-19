@@ -1,10 +1,10 @@
 use anyhow::Result;
-use colored::Colorize;
 use langtime::parse;
 
 use crate::commands::display::{print_task_readable, print_tasks_heading, ReadableOptions};
 use crate::database::{current_entry, get_entry_by_id, update_entry};
 use crate::State;
+use crate::style::{style_string, Styles};
 
 pub fn edit_task(
     id: &Option<usize>,
@@ -23,7 +23,10 @@ pub fn edit_task(
     };
 
     if running_entry.is_none() && entry.is_none() {
-        println!("The task was not found. Either the given id is invalid or there is no task running.");
+        println!(
+            "{}", 
+            style_string("The task was not found. Either the given id is invalid or there is no task running.", Styles::Message)
+        );
         return Ok(());
     }
 
@@ -49,7 +52,10 @@ pub fn edit_task(
     update_entry(&entry, &state.database)?;
 
     // Display output
-    println!("{}", "Entry updated:".bold());
+    println!(
+        "{}",
+        style_string("Entry updated:", Styles::Message)
+    );
 
     let options = ReadableOptions::new();
 

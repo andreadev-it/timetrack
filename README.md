@@ -12,6 +12,7 @@ applications.
 
 ## Things to do 
 - [ ] Add the "month" command as an alias for display
-- [ ] Check for edge cases (e.g. all sheets removed)
+- [x] Check for edge cases (e.g. all sheets removed)
 - [ ] Improve code quality
+- [ ] Add errors contexts
 - [ ] Add tests

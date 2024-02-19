@@ -5,6 +5,7 @@ use langtime::parse;
 use serde_json::to_string_pretty;
 
 use crate::database::get_sheet_entries;
+use crate::style::{style_string, Styles};
 use crate::utils::{day_begin, day_end, format_duration, is_same_day};
 use crate::Entry;
 use crate::State;
@@ -44,6 +45,7 @@ pub fn display_tasks(
     sheet: Option<&String>,
     start: Option<&String>,
     end: Option<&String>,
+    filter_by_date: &bool,
     ids: &bool,
     state: &State,
 ) -> Result<()> {
@@ -55,9 +57,14 @@ pub fn display_tasks(
     entries.sort_by(|a, b| a.start.cmp(&b.start));
 
     // Filtering
-    let start = start.map(|s| parse(s)).transpose()?.map(day_begin);
+    let mut start = start.map(|s| parse(s)).transpose()?.map(day_begin);
 
-    let end = end.map(|e| parse(e)).transpose()?.map(day_end);
+    let mut end = end.map(|e| parse(e)).transpose()?.map(day_end);
+
+    if *filter_by_date {
+        start = start.map(day_begin);
+        end = end.map(day_end);
+    }
 
     entries.retain(|e| {
         if start.is_some() && e.start < start.unwrap() {
@@ -87,7 +94,11 @@ pub fn display_tasks(
 
 pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &ReadableOptions) {
     if options.show_timesheet {
-        println!("{} {}", "Timesheet:".bold(), sheet);
+        println!(
+            "{} {}",
+            style_string("Timesheet:", Styles::Title),
+            sheet
+        );
     }
 
     print_tasks_heading(options);
@@ -124,7 +135,11 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
     let total = entries.iter().map(|e| e.get_duration()).sum();
     if options.show_total {
         println!("{}", "-".repeat(67));
-        println!("{:<49}{}", "Total".bold(), format_duration(&total));
+        println!(
+            "{:<49}{}",
+            style_string("Total", Styles::Title),
+            format_duration(&total)
+        );
     }
 }
 
@@ -147,7 +162,11 @@ pub fn print_tasks_heading(options: &ReadableOptions) {
 
     let pad = " ".repeat(options.padding);
 
-    println!("{}{}", pad, full_label.bold());
+    println!(
+        "{}{}",
+        pad,
+        style_string(&full_label, Styles::Title)
+    );
 }
 
 pub fn print_task_readable(entry: &Entry, print_date: bool, options: &ReadableOptions) {

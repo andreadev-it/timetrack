@@ -4,6 +4,7 @@ mod database;
 mod entry;
 mod state;
 mod utils;
+mod style;
 
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
@@ -13,6 +14,8 @@ use database::{connect_to_db, create_tables, ensure_db_exists};
 pub use entry::Entry;
 use langtime::parse;
 pub use state::State;
+
+use crate::style::{style_string, Styles};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, infer_subcommands = true)]
@@ -41,6 +44,8 @@ enum Subcommands {
         start: Option<String>,
         #[arg(short, long)]
         end: Option<String>,
+        #[arg(short, long)]
+        filter_by_date: bool,
         sheet: Option<String>,
     },
     Sheet {
@@ -73,7 +78,21 @@ struct KillArgs {
     sheet: Option<String>,
 }
 
-fn main() -> Result<()> {
+fn main() {
+    match cli() {
+        Ok(_) => {}
+        Err(e) => {
+            println!(
+                "{} {}",
+                style_string("Error:", Styles::Error),
+                e
+            );
+            std::process::exit(1);
+        }
+    }
+}
+
+fn cli() -> Result<()> {
     let config = Config::build();
 
     setup(&config)?;
@@ -102,6 +121,7 @@ fn main() -> Result<()> {
             sheet,
             start,
             end,
+            filter_by_date,
             ids,
         } => {
             display_tasks(
@@ -109,6 +129,7 @@ fn main() -> Result<()> {
                 sheet.as_ref(),
                 start.as_ref(),
                 end.as_ref(),
+                filter_by_date,
                 ids,
                 &state,
             )?;
