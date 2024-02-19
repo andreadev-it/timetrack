@@ -1,5 +1,6 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
+use colored::Colorize;
 
 use crate::database::write_entry;
 use crate::Entry;
@@ -12,7 +13,7 @@ pub fn start_task(task: &str, at: Option<DateTime<Local>>, state: &State) -> Res
 
     write_entry(&entry, &state.database)?;
 
-    println!("Checked into sheet: {}", entry.sheet);
+    println!("{} {}", "Checked into sheet:".bold(), entry.sheet);
 
     Ok(())
 }
