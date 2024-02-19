@@ -1,10 +1,26 @@
 use anyhow::Result;
 use colored::Colorize;
 
-use crate::database::{remove_entries_by_sheet, remove_entry_by_id, get_all_sheets};
+use crate::database::{remove_entries_by_sheet, remove_entry_by_id, get_all_sheets, get_entry_by_id};
 use crate::State;
+use crate::utils::confirm_action;
 
 pub fn kill_task(id: &usize, state: &mut State) -> Result<()> {
+
+    let entry = get_entry_by_id(id, &state.database)?;
+
+    // Guard for non-existent entries
+    if entry.is_none() {
+        println!("{} {}", "Entry not found. Id:".bold(), id);
+        return Ok(());
+    }
+
+    let entry = entry.unwrap();
+    
+    if !confirm_action(&format!("Are you sure you want to remove entry {}?", entry.name)) {
+        return Ok(());
+    }
+
     remove_entry_by_id(id, &state.database)?;
 
     println!("{} {}", "Removed entry:".bold(), id);
@@ -18,6 +34,10 @@ pub fn kill_sheet(sheet: &str, state: &mut State) -> Result<()> {
     // Guard for non-existent sheets
     if !sheets.iter().any(|s| s == sheet) {
         println!("{} {}", "Sheet not found:".bold(), sheet);
+        return Ok(());
+    }
+
+    if !confirm_action("Are you sure you want to remove sheet {sheet}?") {
         return Ok(());
     }
 

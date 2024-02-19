@@ -88,6 +88,13 @@ pub fn is_same_day(dt1: &DateTime<Local>, dt2: &DateTime<Local>) -> bool {
     dt1.year() == dt2.year() && dt1.month() == dt2.month() && dt1.day() == dt2.day()
 }
 
+pub fn confirm_action(msg: &str) -> bool {
+    println!("{}", msg);
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).unwrap();
+    input.trim().to_lowercase() == "y"
+}
+
 mod tests {
     use super::*;
 

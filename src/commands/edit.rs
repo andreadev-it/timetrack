@@ -23,7 +23,7 @@ pub fn edit_task(
     };
 
     if running_entry.is_none() && entry.is_none() {
-        println!("There is no active task, and no id was given.");
+        println!("The task was not found. Either the given id is invalid or there is no task running.");
         return Ok(());
     }
 

@@ -5,9 +5,13 @@ use crate::database::get_all_sheets;
 use crate::State;
 
 pub fn list_sheets(state: &State) -> Result<()> {
-    println!("{}", "Timesheets:".bold());
+    let mut sheets = get_all_sheets(&state.database)?;
 
-    let sheets = get_all_sheets(&state.database)?;
+    if sheets.is_empty() {
+        sheets.push(state.current_sheet.to_string());
+    }
+
+    println!("{}", "Timesheets:".bold());
 
     for sheet in sheets {
         if sheet == state.current_sheet {

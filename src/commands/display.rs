@@ -118,13 +118,13 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
     }
 
     if options.show_partial_sum {
-        println!("{:<47}{}", "", format_duration(&day_sum));
+        println!("{:<49}{}", "", format_duration(&day_sum));
     }
 
     let total = entries.iter().map(|e| e.get_duration()).sum();
     if options.show_total {
         println!("{}", "-".repeat(67));
-        println!("{:<47}{}", "Total".bold(), format_duration(&total));
+        println!("{:<49}{}", "Total".bold(), format_duration(&total));
     }
 }
 
@@ -134,9 +134,9 @@ pub fn print_tasks_heading(options: &ReadableOptions) {
     } else {
         " ".repeat(6)
     };
-    let date_label = format!("{:<18}", "Date");
+    let date_label = format!("{:<20}", "Date");
     let start_label = format!("{:<11}", "Start");
-    let end_label = format!("{:<10}", "End");
+    let end_label = format!("{:<12}", "End");
     let duration_label = format!("{:<12}", "Duration");
     let notes_label = "Notes";
 
@@ -170,7 +170,7 @@ pub fn print_task_readable(entry: &Entry, print_date: bool, options: &ReadableOp
     let pad = " ".repeat(options.padding);
 
     println!(
-        "{}{}{:<18}  {} - {}  {:<10}  {}",
+        "{}{}{:<18}  {} - {:<10}  {:<10}  {}",
         pad,
         id,
         date,
