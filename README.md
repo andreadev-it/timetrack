@@ -11,7 +11,7 @@ and a JSON output that can be piped into other commands or
 applications.
 
 ## Things to do 
-- [ ] Add the "month" command as an alias for display
+- [x] Add the "month" command as an alias for display
 - [x] Check for edge cases (e.g. all sheets removed)
 - [ ] Improve code quality
 - [ ] Add errors contexts

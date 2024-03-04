@@ -59,7 +59,7 @@ impl State {
             });
         }
 
-        panic!("Cannot get project directories for this OS.");
+        Err(anyhow::anyhow!("Cannot get project directories for this OS."))
     }
 
     pub fn change_sheet(&mut self, sheet: &str) -> Result<()> {

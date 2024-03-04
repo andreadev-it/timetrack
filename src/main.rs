@@ -102,7 +102,7 @@ fn main() {
 }
 
 fn cli() -> Result<()> {
-    let config = Config::build();
+    let config = Config::build()?;
 
     setup(&config)?;
 

@@ -9,10 +9,18 @@ pub fn current_task(state: &State) -> Result<()> {
     let entry = current_entry(&state.database)?;
 
     match entry {
-        None => println!(
-            "{}", 
-            style_string("There is no active task.", Styles::Message)
-        ),
+        None => {
+            println!(
+                "{} {}",
+                style_string("On sheet:", Styles::Title),
+                style_string(&state.current_sheet, Styles::Primary)
+            );
+
+            println!(
+                "{}", 
+                style_string("There is no active task.", Styles::Message)
+            )
+        },
         Some(e) => {
             let elapsed = time_from_now(&e.start);
 

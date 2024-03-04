@@ -1,7 +1,7 @@
 use anyhow::Result;
 use langtime::parse;
 
-use crate::commands::display::{print_task_readable, print_tasks_heading, ReadableOptions};
+use crate::commands::display::{print_all_tasks_readable, ReadableOptions};
 use crate::database::{current_entry, get_entry_by_id, update_entry};
 use crate::State;
 use crate::style::{style_string, Styles};
@@ -57,10 +57,11 @@ pub fn edit_task(
         style_string("Entry updated:", Styles::Message)
     );
 
-    let options = ReadableOptions::new();
+    let mut options = ReadableOptions::new();
+    options.show_headings = true;
+    options.show_ids = true;
 
-    print_tasks_heading(&options);
-    print_task_readable(&entry, true, &options);
+    print_all_tasks_readable("", &vec![entry], &options);
 
     Ok(())
 }

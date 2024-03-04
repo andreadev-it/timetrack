@@ -1,4 +1,4 @@
-use core::panic;
+use anyhow::{Result, anyhow};
 
 use directories::ProjectDirs;
 
@@ -9,7 +9,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build() -> Config {
+    pub fn build() -> Result<Config> {
         if let Some(proj_dirs) = ProjectDirs::from("com", "andreadev-it", "timetrack") {
             let data_dir = proj_dirs.data_local_dir();
 
@@ -17,15 +17,15 @@ impl Config {
             db_file.push("database.db");
 
             if let Some(db_file_str) = db_file.to_str() {
-                return Config {
+                return Ok(Config {
                     database_file: db_file_str.to_string(),
                     default_sheet: "default".to_string(),
-                };
+                });
             }
 
-            panic!("Seems like the path contains invalid unicode. Please forward this to the developer. The path was: {:?}", db_file);
+            return Err(anyhow!("Seems like the path contains invalid unicode. Please forward this to the developer. The path was: {:?}", db_file));
         }
 
-        panic!("Cannot get project directories for this OS.");
+        Err(anyhow!("Cannot get project directories for this OS."))
     }
 }

@@ -2,6 +2,11 @@ use anyhow::Result;
 use chrono::{Duration, DateTime, Local};
 use langtime::parse;
 use serde_json::to_string_pretty;
+use tabled::builder::Builder;
+use tabled::settings::object::Rows;
+use tabled::settings::{Style, Color, Padding, Border};
+use colored::Colorize;
+use tabled::settings::themes::Colorization;
 
 use crate::database::get_sheet_entries;
 use crate::style::{style_string, Styles};
@@ -14,6 +19,7 @@ pub struct ReadableOptions {
     pub show_timesheet: bool,
     pub show_partial_sum: bool,
     pub show_total: bool,
+    pub show_headings: bool,
     pub padding: usize,
 }
 
@@ -24,6 +30,7 @@ impl ReadableOptions {
             show_timesheet: false,
             show_partial_sum: false,
             show_total: false,
+            show_headings: false,
             padding: 0,
         }
     }
@@ -34,6 +41,7 @@ impl ReadableOptions {
             show_timesheet: true,
             show_partial_sum: true,
             show_total: true,
+            show_headings: true,
             padding: 0,
         }
     }
@@ -108,7 +116,17 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
         );
     }
 
-    print_tasks_heading(options);
+    let mut builder = Builder::new();
+
+    if options.show_headings {
+        let h_id = match options.show_ids {
+            true => "ID",
+            false => ""
+        };
+        
+        let headings = vec![h_id, "Start", "End", "Duration", "Task"];
+        builder.push_record(headings);
+    }
 
     let mut prev_date = None;
     let mut day_sum = Duration::zero();
@@ -126,85 +144,59 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
         prev_date = Some(&entry.start);
 
         if print_partial && options.show_partial_sum {
-            println!("{:<49}{}", "", format_duration(&day_sum));
+            builder.push_record(vec!["", "", "", &format_duration(&day_sum)]);
             day_sum = Duration::zero();
         }
 
         day_sum = day_sum + entry.get_duration();
 
-        print_task_readable(entry, print_date, options);
+        let id = match options.show_ids {
+            true => entry.id.unwrap().to_string(),
+            false => "".to_string()
+        };
+
+        let start = match print_date {
+            true => entry.start.format("%a %b %d, %Y").to_string(),
+            false => "".to_string()
+        };
+
+        let end = match entry.end {
+            Some(d) => d.format("%H:%M:%S").to_string(),
+            None => "".to_string(),
+        };
+
+        builder.push_record(vec![
+            &id,
+            &start,
+            &end,
+            &format_duration(&entry.get_duration()),
+            &entry.name
+        ]);
     }
 
     if options.show_partial_sum {
-        println!("{:<49}{}", "", format_duration(&day_sum));
+        builder.push_record(vec!["", "", "", &format_duration(&day_sum)]);
     }
 
     let total = entries.iter().map(|e| e.get_duration()).sum();
     if options.show_total {
-        println!("{}", "-".repeat(67));
-        println!(
-            "{:<49}{}",
-            style_string("Total", Styles::Title),
-            format_duration(&total)
-        );
+        builder.push_record(vec!["Total", "", "", &format_duration(&total)]);
     }
-}
 
-pub fn print_tasks_heading(options: &ReadableOptions) {
-    let id_label = if options.show_ids {
-        format!("{:<6}", "ID")
-    } else {
-        " ".repeat(6)
-    };
-    let date_label = format!("{:<20}", "Date");
-    let start_label = format!("{:<11}", "Start");
-    let end_label = format!("{:<12}", "End");
-    let duration_label = format!("{:<12}", "Duration");
-    let notes_label = "Notes";
+    let mut table = builder.build();
+    table.with(Style::empty());
+    table.with(Padding::new(2, 2, 0, 0));
 
-    let full_label = format!(
-        "{}{}{}{}{}{}",
-        id_label, date_label, start_label, end_label, duration_label, notes_label
-    );
+    if options.show_headings {
+        table.with(Colorization::exact([Color::BOLD], Rows::first()));
+    }
 
-    let pad = " ".repeat(options.padding);
+    if options.show_total {
+        table.with(Colorization::exact([Color::BOLD], Rows::last()));
+        table.modify(Rows::last(), Border::new().set_top('-'));
+    }
 
-    println!(
-        "{}{}",
-        pad,
-        style_string(&full_label, Styles::Title)
-    );
-}
-
-pub fn print_task_readable(entry: &Entry, print_date: bool, options: &ReadableOptions) {
-    let end = entry
-        .end
-        .map(|d| d.format("%H:%M:%S").to_string())
-        .unwrap_or("".to_string());
-
-    let id = match options.show_ids {
-        // I can unwrap because all tasks are taken from the db and will have ids
-        true => format!("{:<6}", entry.id.unwrap()),
-        false => " ".repeat(6),
-    };
-
-    let date = match print_date {
-        true => entry.start.format("%a %b %d, %Y").to_string(),
-        false => "".to_string(),
-    };
-
-    let pad = " ".repeat(options.padding);
-
-    println!(
-        "{}{}{:<18}  {} - {:<10}  {:<10}  {}",
-        pad,
-        id,
-        date,
-        entry.start.format("%H:%M:%S"),
-        end,
-        format_duration(&entry.get_duration()),
-        entry.name
-    )
+    println!("{}", table);
 }
 
 pub fn print_all_tasks_json(entries: &Vec<Entry>) -> Result<()> {
