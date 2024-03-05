@@ -124,7 +124,7 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
             false => ""
         };
         
-        let headings = vec![h_id, "Start", "End", "Duration", "Task"];
+        let headings = vec![h_id, "Date", "Start", "End", "Duration", "Task"];
         builder.push_record(headings);
     }
 
@@ -144,7 +144,7 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
         prev_date = Some(&entry.start);
 
         if print_partial && options.show_partial_sum {
-            builder.push_record(vec!["", "", "", &format_duration(&day_sum)]);
+            builder.push_record(vec!["", "", "", "", &format_duration(&day_sum)]);
             day_sum = Duration::zero();
         }
 
@@ -155,10 +155,12 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
             false => "".to_string()
         };
 
-        let start = match print_date {
+        let date = match print_date {
             true => entry.start.format("%a %b %d, %Y").to_string(),
             false => "".to_string()
         };
+
+        let start = entry.start.format("%H:%M:%S").to_string();
 
         let end = match entry.end {
             Some(d) => d.format("%H:%M:%S").to_string(),
@@ -167,6 +169,7 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
 
         builder.push_record(vec![
             &id,
+            &date,
             &start,
             &end,
             &format_duration(&entry.get_duration()),
@@ -175,12 +178,12 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
     }
 
     if options.show_partial_sum {
-        builder.push_record(vec!["", "", "", &format_duration(&day_sum)]);
+        builder.push_record(vec!["", "", "", "", &format_duration(&day_sum)]);
     }
 
     let total = entries.iter().map(|e| e.get_duration()).sum();
     if options.show_total {
-        builder.push_record(vec!["Total", "", "", &format_duration(&total)]);
+        builder.push_record(vec!["Total", "", "", "", &format_duration(&total)]);
     }
 
     let mut table = builder.build();
