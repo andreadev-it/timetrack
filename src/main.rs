@@ -26,53 +26,81 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Subcommands {
+    /// Checks into the current timesheet
     In {
+        /// The task description
         task: Option<String>,
+        /// The time and date this task was started. "15 minutes ago" and similar are also ok
         #[arg(short, long)]
         at: Option<String>,
     },
+    /// Checks out of the current timesheet
     Out {
+        /// The time and date this task has ended. "15 minutes ago" and similar are also ok
         #[arg(short, long)]
         at: Option<String>,
     },
+    /// Displays the current timesheet
     Display {
+        /// Show a JSON representation instead of a human-readable one
         #[arg(long)]
         json: bool,
+        /// Show the tasks IDs
         #[arg(short, long)]
         ids: bool,
+        /// Filter the tasks based on when they started
         #[arg(short, long)]
         start: Option<String>,
+        /// Filter the tasks based on when they ended
         #[arg(short, long)]
         end: Option<String>,
+        /// Just filter by whole days, do not take into account the time
         #[arg(short, long)]
         filter_by_date: bool,
+        /// The timesheet to display, or the current one
         sheet: Option<String>,
     },
+    /// Like `Display`, but for a specific month, or the current one
     Month {
+        /// Show a JSON representation instead of a human-readable one
         #[arg(long)]
         json: bool,
+        /// Show the tasks IDs
         #[arg(short, long)]
         ids: bool,
+        /// The specific month to show. The format is yyyy-mm (e.g. "2024-03")
         #[arg(short, long)]
         month: Option<String>,
+        /// The timesheet to display, or the current one
         sheet: Option<String>,
     },
+    /// Change timesheet
     Sheet {
+        /// The name of the timesheet
         name: Option<String>,
     },
+    /// List available timesheet
     List,
+    /// Edit a task
     Edit {
+        /// The ID of the task to edit
         #[arg(short, long)]
         id: Option<usize>,
+        /// Set a new start date and time for this task
         #[arg(short, long)]
         start: Option<String>,
+        /// Set a new end date and time for this task
         #[arg(short, long)]
         end: Option<String>,
+        /// Move this task to a different timesheet
         #[arg(short, long)]
         move_to: Option<String>,
+        /// The new task description
         notes: Option<String>,
     },
+    /// Shows the active task for the current sheet
     Current,
+    /// Removes a task or a whole timesheet
     Kill {
         #[command(flatten)]
         kill_args: KillArgs,
@@ -82,8 +110,10 @@ enum Subcommands {
 #[derive(Args, Debug)]
 #[group(required = true, multiple = false)]
 struct KillArgs {
+    /// The ID of the task to remove
     #[arg(long)]
     id: Option<usize>,
+    /// The name of the timesheet to remove
     sheet: Option<String>,
 }
 

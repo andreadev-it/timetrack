@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chrono::{Local, Duration};
+use chrono::{Duration, Local};
 use tabled::builder::Builder;
 use tabled::settings::object::Rows;
 use tabled::settings::themes::Colorization;
@@ -24,15 +24,12 @@ pub fn list_sheets(state: &State) -> Result<()> {
     builder.push_record(vec!["Name", "Running", "Today", "Total time"]);
 
     for sheet in sheets {
-
         let entries = get_sheet_entries(&sheet, &state.database)?;
 
         let running = entries.iter().find(|e| e.end.is_none());
         let running_time = match running {
-            Some(e) => {
-                time_from_now(&e.start)
-            },
-            None => Duration::seconds(0)
+            Some(e) => time_from_now(&e.start),
+            None => Duration::seconds(0),
         };
 
         let today_total: Duration = entries
@@ -46,7 +43,6 @@ pub fn list_sheets(state: &State) -> Result<()> {
             .map(|e| e.end.unwrap_or(Local::now()) - e.start)
             .sum();
 
-
         let s = if sheet == state.current_sheet {
             format!("{}{}", "*", sheet)
         } else if sheet == state.last_sheet {
@@ -59,7 +55,7 @@ pub fn list_sheets(state: &State) -> Result<()> {
             s,
             format_duration(&running_time),
             format_duration(&today_total),
-            format_duration(&total)
+            format_duration(&total),
         ]);
     }
 

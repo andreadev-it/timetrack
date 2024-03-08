@@ -2,7 +2,7 @@ use anyhow::Result;
 use langtime::parse;
 
 use crate::commands::display::{print_all_tasks_readable, ReadableOptions};
-use crate::database::{running_entry, get_entry_by_id, update_entry};
+use crate::database::{get_entry_by_id, running_entry, update_entry};
 use crate::style::{style_string, Styles};
 use crate::State;
 
