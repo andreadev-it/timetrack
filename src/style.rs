@@ -1,11 +1,11 @@
-use colored::{Colorize, ColoredString};
+use colored::{ColoredString, Colorize};
 
 pub enum Styles {
     Error,
     Title,
     Message,
     Primary,
-    Secondary
+    Secondary,
 }
 
 pub fn style_string(label: &str, style: Styles) -> ColoredString {

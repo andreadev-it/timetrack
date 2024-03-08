@@ -2,9 +2,9 @@ use anyhow::Result;
 use langtime::parse;
 
 use crate::commands::display::{print_all_tasks_readable, ReadableOptions};
-use crate::database::{current_entry, get_entry_by_id, update_entry};
-use crate::State;
+use crate::database::{running_entry, get_entry_by_id, update_entry};
 use crate::style::{style_string, Styles};
+use crate::State;
 
 pub fn edit_task(
     id: &Option<usize>,
@@ -14,7 +14,7 @@ pub fn edit_task(
     notes: &Option<String>,
     state: &mut State,
 ) -> Result<()> {
-    let running_entry = current_entry(&state.database)?;
+    let running_entry = running_entry(&state.database, &state.current_sheet)?;
 
     let entry = if let Some(id) = id {
         get_entry_by_id(id, &state.database)?
@@ -52,10 +52,7 @@ pub fn edit_task(
     update_entry(&entry, &state.database)?;
 
     // Display output
-    println!(
-        "{}",
-        style_string("Entry updated:", Styles::Message)
-    );
+    println!("{}", style_string("Entry updated:", Styles::Message));
 
     let mut options = ReadableOptions::new();
     options.show_headings = true;

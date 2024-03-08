@@ -1,14 +1,14 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
 
-use crate::database::{current_entry, write_entry};
-use crate::State;
+use crate::database::{running_entry, write_entry};
 use crate::style::{style_string, Styles};
+use crate::State;
 
 pub fn stop_task(at: Option<DateTime<Local>>, state: &mut State) -> Result<()> {
     let end = at.unwrap_or(Local::now());
 
-    let cur = current_entry(&state.database)?;
+    let cur = running_entry(&state.database, &state.current_sheet)?;
 
     match cur {
         None => println!(
@@ -27,10 +27,6 @@ pub fn stop_task(at: Option<DateTime<Local>>, state: &mut State) -> Result<()> {
 
             e.stop(end);
             write_entry(&e, &state.database)?;
-
-            // This is safe to unwrap because the entry is
-            // taken from the db, which means it has an id.
-            state.set_last_task(e.id.unwrap())?;
 
             println!(
                 "{} {}",

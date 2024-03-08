@@ -99,13 +99,13 @@ pub fn create_entry(entry: &Entry, db: &Connection) -> Result<()> {
     Ok(())
 }
 
-pub fn current_entry(db: &Connection) -> Result<Option<Entry>> {
+pub fn running_entry(db: &Connection, sheet: &str) -> Result<Option<Entry>> {
     let query = "
-    SELECT id, note, start, end, sheet FROM entries WHERE end IS NULL;
+    SELECT id, note, start, end, sheet FROM entries WHERE end IS NULL AND sheet = ?;
     ";
 
     let mut stmt = db.prepare(query)?;
-    let mut entries = stmt.query_map([], |row| {
+    let mut entries = stmt.query_map([sheet], |row| {
         let end = row
             .get::<usize, Option<String>>(3)?
             .map(|t| str_to_datetime(&t).unwrap());

@@ -1,9 +1,11 @@
 use anyhow::Result;
 
-use crate::{State, style::{Styles, style_string}};
+use crate::{
+    style::{style_string, Styles},
+    State,
+};
 
 pub fn checkout_sheet(name: &str, state: &mut State) -> Result<()> {
-
     // Guard to check if I'm already on that sheet
     if state.current_sheet == name {
         println!(

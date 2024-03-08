@@ -1,12 +1,10 @@
 use anyhow::Result;
-use chrono::{Duration, DateTime, Local};
-use langtime::parse;
+use chrono::{DateTime, Duration, Local};
 use serde_json::to_string_pretty;
 use tabled::builder::Builder;
 use tabled::settings::object::Rows;
-use tabled::settings::{Style, Color, Padding, Border};
-use colored::Colorize;
 use tabled::settings::themes::Colorization;
+use tabled::settings::{Border, Color, Padding, Style};
 
 use crate::database::get_sheet_entries;
 use crate::style::{style_string, Styles};
@@ -66,7 +64,7 @@ pub fn display_tasks(
             style_string("No sheet found with name:", Styles::Message),
             sheet
         );
-        return Ok(())
+        return Ok(());
     }
 
     // Sorting
@@ -109,11 +107,7 @@ pub fn display_tasks(
 
 pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &ReadableOptions) {
     if options.show_timesheet {
-        println!(
-            "{} {}",
-            style_string("Timesheet:", Styles::Title),
-            sheet
-        );
+        println!("{} {}", style_string("Timesheet:", Styles::Title), sheet);
     }
 
     let mut builder = Builder::new();
@@ -121,9 +115,9 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
     if options.show_headings {
         let h_id = match options.show_ids {
             true => "ID",
-            false => ""
+            false => "",
         };
-        
+
         let headings = vec![h_id, "Date", "Start", "End", "Duration", "Task"];
         builder.push_record(headings);
     }
@@ -152,12 +146,12 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
 
         let id = match options.show_ids {
             true => entry.id.unwrap().to_string(),
-            false => "".to_string()
+            false => "".to_string(),
         };
 
         let date = match print_date {
             true => entry.start.format("%a %b %d, %Y").to_string(),
-            false => "".to_string()
+            false => "".to_string(),
         };
 
         let start = entry.start.format("%H:%M:%S").to_string();
@@ -173,7 +167,7 @@ pub fn print_all_tasks_readable(sheet: &str, entries: &Vec<Entry>, options: &Rea
             &start,
             &end,
             &format_duration(&entry.get_duration()),
-            &entry.name
+            &entry.name,
         ]);
     }
 

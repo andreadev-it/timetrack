@@ -3,8 +3,8 @@ mod config;
 mod database;
 mod entry;
 mod state;
-mod utils;
 mod style;
+mod utils;
 
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
@@ -55,7 +55,7 @@ enum Subcommands {
         ids: bool,
         #[arg(short, long)]
         month: Option<String>,
-        sheet: Option<String>
+        sheet: Option<String>,
     },
     Sheet {
         name: Option<String>,
@@ -88,16 +88,9 @@ struct KillArgs {
 }
 
 fn main() {
-    match cli() {
-        Ok(_) => {}
-        Err(e) => {
-            println!(
-                "{} {}",
-                style_string("Error:", Styles::Error),
-                e
-            );
-            std::process::exit(1);
-        }
+    if let Err(e) = cli() {
+        println!("{} {}", style_string("Error:", Styles::Error), e);
+        std::process::exit(1);
     }
 }
 
@@ -142,15 +135,14 @@ fn cli() -> Result<()> {
                 ids,
                 &state,
             )?;
-        },
-        Subcommands::Month { json, ids, month, sheet } => {
-            display_month(
-                json,
-                ids,
-                month.as_ref(),
-                sheet.as_ref(),
-                &mut state
-            )?;
+        }
+        Subcommands::Month {
+            json,
+            ids,
+            month,
+            sheet,
+        } => {
+            display_month(json, ids, month.as_ref(), sheet.as_ref(), &mut state)?;
         }
         Subcommands::Sheet { name } => match name {
             Some(s) => checkout_sheet(s, &mut state)?,
@@ -158,10 +150,10 @@ fn cli() -> Result<()> {
         },
         Subcommands::List => {
             list_sheets(&state)?;
-        },
+        }
         Subcommands::Current => {
             current_task(&state)?;
-        },
+        }
         Subcommands::Edit {
             id,
             start,
@@ -170,7 +162,7 @@ fn cli() -> Result<()> {
             notes,
         } => {
             edit_task(id, start, end, move_to, notes, &mut state)?;
-        },
+        }
         Subcommands::Kill { kill_args } => {
             if let Some(id) = &kill_args.id {
                 kill_task(id, &mut state)?;
