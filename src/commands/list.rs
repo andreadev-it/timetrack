@@ -48,7 +48,7 @@ pub fn list_sheets(state: &State) -> Result<()> {
         } else if sheet == state.last_sheet {
             format!("{}{}", "-", sheet)
         } else {
-            format!("{}", sheet)
+            sheet
         };
 
         builder.push_record(vec![
