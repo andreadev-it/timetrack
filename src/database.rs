@@ -99,6 +99,37 @@ pub fn create_entry(entry: &Entry, db: &Connection) -> Result<()> {
     Ok(())
 }
 
+pub fn running_entries(db: &Connection) -> Result<Vec<Entry>> {
+    let query = "
+    SELECT id, note, start, end, sheet FROM entries WHERE end IS NULL;
+    ";
+
+    let mut stmt = db.prepare(query)?;
+    let entries = stmt.query_map([], |row| {
+        let end = row
+            .get::<usize, Option<String>>(3)?
+            .map(|t| str_to_datetime(&t).unwrap());
+
+        let start = str_to_datetime(&row.get::<usize, String>(2)?).unwrap();
+
+        Ok(Entry {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            start,
+            end,
+            sheet: row.get(4)?,
+        })
+    })?;
+
+    let entries_vec: Vec<Result<Entry, _>> = entries.collect();
+
+    if entries_vec.iter().any(|e| e.is_err()) {
+        return Err(anyhow!("Error while parsing the running entries"));
+    }
+
+    Ok(entries_vec.into_iter().map(|e| e.unwrap()).collect())
+}
+
 pub fn running_entry(db: &Connection, sheet: &str) -> Result<Option<Entry>> {
     let query = "
     SELECT id, note, start, end, sheet FROM entries WHERE end IS NULL AND sheet = ?;

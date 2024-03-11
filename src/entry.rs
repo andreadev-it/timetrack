@@ -3,7 +3,7 @@ use serde::Serialize;
 
 use crate::config::Config;
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, PartialOrd, Ord)]
 pub struct Entry {
     pub id: Option<usize>,
     pub start: DateTime<Local>,

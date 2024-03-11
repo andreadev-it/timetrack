@@ -10,22 +10,21 @@ pub struct Config {
 
 impl Config {
     pub fn build() -> Result<Config> {
-        if let Some(proj_dirs) = ProjectDirs::from("com", "andreadev-it", "timetrack") {
-            let data_dir = proj_dirs.data_local_dir();
+        let proj_dirs = ProjectDirs::from("com", "andreadev-it", "timetrack")
+            .ok_or(anyhow!("Cannot get project directories for this OS."))?;
 
-            let mut db_file = data_dir.to_path_buf();
-            db_file.push("database.db");
+        // Get the data file path
+        let data_dir = proj_dirs.data_local_dir();
+        let mut db_file = data_dir.to_path_buf();
+        db_file.push("database.db");
 
-            if let Some(db_file_str) = db_file.to_str() {
-                return Ok(Config {
-                    database_file: db_file_str.to_string(),
-                    default_sheet: "default".to_string(),
-                });
-            }
-
-            return Err(anyhow!("Seems like the path contains invalid unicode. Please forward this to the developer. The path was: {:?}", db_file));
+        if let Some(db_file_str) = db_file.to_str() {
+            return Ok(Config {
+                database_file: db_file_str.to_string(),
+                default_sheet: "default".to_string(),
+            });
         }
 
-        Err(anyhow!("Cannot get project directories for this OS."))
+        Err(anyhow!("Seems like the path contains invalid unicode. Please forward this to the developer. The path was: {:?}", db_file))
     }
 }

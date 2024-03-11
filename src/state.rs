@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Context, Result};
 use directories::ProjectDirs;
 use rusqlite::Connection;
 use std::fs;
@@ -17,47 +17,45 @@ impl State {
     pub fn build(config: &Config) -> Result<State> {
         let db = connect_to_db(config)?;
 
-        if let Some(proj_dirs) = ProjectDirs::from("com", "andreadev-it", "timetrack") {
-            let data_dir = proj_dirs.data_local_dir();
+        let proj_dirs = ProjectDirs::from("com", "andreadev-it", "timetrack")
+            .ok_or(anyhow!("Cannot get project directories for this OS."))?;
 
-            let mut data_file = data_dir.to_path_buf();
-            data_file.push("data.txt");
+        // Prepare the default state
+        let mut state = State {
+            current_sheet: "default".to_string(),
+            last_sheet: "default".to_string(),
+            database: db,
+        };
 
-            let mut sheet = "default".to_string();
-            let mut last_sheet = "default".to_string();
-            let mut last_task: Option<usize> = None;
+        // Get the data file path
+        let data_dir = proj_dirs.data_local_dir();
+        let mut data_file = data_dir.to_path_buf();
+        data_file.push("data.txt");
 
-            let content_res = fs::read_to_string(&data_file);
+        // Extract the data from the file
+        let content_res = fs::read_to_string(&data_file);
 
-            match content_res {
-                Ok(content) => {
-                    // read the data file
-                    let mut lines = content.lines();
+        match content_res {
+            Ok(content) => {
+                let mut lines = content.lines();
 
-                    if let Some(s) = lines.next() {
-                        sheet = s.to_string();
-                    }
-
-                    if let Some(s) = lines.next() {
-                        last_sheet = s.to_string();
-                    }
+                if let Some(s) = lines.next() {
+                    state.current_sheet = s.to_string();
                 }
-                Err(_) => {
-                    // write the default file
-                    fs::write(&data_file, format!("{}\n", &sheet))?;
+
+                if let Some(s) = lines.next() {
+                    state.last_sheet = s.to_string();
                 }
             }
-
-            return Ok(State {
-                current_sheet: sheet,
-                last_sheet,
-                database: db,
-            });
+            Err(_) => {
+                // write the default file
+                state
+                    .update_file()
+                    .context("Cannot write the default state file.")?;
+            }
         }
 
-        Err(anyhow::anyhow!(
-            "Cannot get project directories for this OS."
-        ))
+        Ok(state)
     }
 
     pub fn change_sheet(&mut self, sheet: &str) -> Result<()> {
@@ -70,17 +68,18 @@ impl State {
     }
 
     fn update_file(&mut self) -> Result<()> {
-        if let Some(proj_dirs) = ProjectDirs::from("com", "andreadev-it", "timetrack") {
-            let data_dir = proj_dirs.data_local_dir();
+        let proj_dirs = ProjectDirs::from("com", "andreadev-it", "timetrack")
+            .ok_or(anyhow!("Cannot get project directories for this OS."))?;
 
-            let mut data_file = data_dir.to_path_buf();
-            data_file.push("data.txt");
+        let data_dir = proj_dirs.data_local_dir();
 
-            fs::write(
-                &data_file,
-                format!("{}\n{}", self.current_sheet, self.last_sheet),
-            )?;
-        }
+        let mut data_file = data_dir.to_path_buf();
+        data_file.push("data.txt");
+
+        fs::write(
+            &data_file,
+            format!("{}\n{}", self.current_sheet, self.last_sheet),
+        )?;
 
         Ok(())
     }
