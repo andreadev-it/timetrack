@@ -55,8 +55,11 @@ pub fn kill_sheet(sheet: &str, state: &mut State) -> Result<()> {
 
     remove_entries_by_sheet(sheet, &state.database)?;
 
+    // Check edge cases for sheets that are in use
     if state.current_sheet == sheet {
         move_to_last_sheet(state)?;
+    } else if state.last_sheet == sheet {
+        state.last_sheet = "default".to_string()
     }
 
     println!(

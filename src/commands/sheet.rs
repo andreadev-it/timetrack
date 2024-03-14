@@ -16,7 +16,14 @@ pub fn checkout_sheet(name: &str, state: &mut State) -> Result<()> {
         return Ok(());
     }
 
-    state.change_sheet(name)?;
+    // Change to the previous sheet if the name is "-".
+    let name = if name == "-" {
+        state.last_sheet.clone()
+    } else {
+        name.to_string()
+    };
+
+    state.change_sheet(&name)?;
 
     println!(
         "{} {}",
