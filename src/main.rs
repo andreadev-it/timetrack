@@ -76,8 +76,9 @@ enum Subcommands {
     },
     /// Change timesheet
     Sheet {
-        /// The name of the timesheet
-        name: Option<String>,
+        name: String,
+        #[arg(short, long)]
+        rename: Option<String>,
     },
     /// List available timesheet
     List,
@@ -174,9 +175,9 @@ fn cli() -> Result<()> {
         } => {
             display_month(json, ids, month.as_ref(), sheet.as_ref(), &mut state)?;
         }
-        Subcommands::Sheet { name } => match name {
-            Some(s) => checkout_sheet(s, &mut state)?,
-            None => list_sheets(&state)?,
+        Subcommands::Sheet { name, rename } => match rename {
+            None => checkout_sheet(name, &mut state)?,
+            Some(new_name) => rename_sheet(name, new_name, &mut state)?,
         },
         Subcommands::List => {
             list_sheets(&state)?;

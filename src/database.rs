@@ -257,6 +257,16 @@ pub fn get_all_sheets(db: &Connection) -> Result<Vec<String>> {
     Ok(sheets)
 }
 
+pub fn update_sheet_name(old_name: &str, new_name: &str, db: &Connection) -> Result<()> {
+    let query = "
+    UPDATE entries SET sheet = ? WHERE sheet = ?
+    ";
+    let mut stmt = db.prepare(query)?;
+    stmt.execute([new_name, old_name])?;
+
+    Ok(())
+}
+
 pub fn remove_entries_by_sheet(sheet: &str, db: &Connection) -> Result<()> {
     let query = "
     DELETE FROM entries WHERE sheet = ?;

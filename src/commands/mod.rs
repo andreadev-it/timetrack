@@ -16,4 +16,4 @@ pub use kill::{kill_sheet, kill_task};
 pub use list::list_sheets;
 pub use month::display_month;
 pub use out::stop_task;
-pub use sheet::checkout_sheet;
+pub use sheet::{checkout_sheet, rename_sheet};

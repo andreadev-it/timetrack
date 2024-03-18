@@ -67,6 +67,14 @@ impl State {
         Ok(())
     }
 
+    pub fn update_sheet_name(&mut self, sheet: &str) -> Result<()> {
+        self.current_sheet = sheet.to_string();
+
+        self.update_file()?;
+
+        Ok(())
+    }
+
     fn update_file(&mut self) -> Result<()> {
         let proj_dirs = ProjectDirs::from("com", "andreadev-it", "timetrack")
             .ok_or(anyhow!("Cannot get project directories for this OS."))?;
