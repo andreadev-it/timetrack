@@ -6,7 +6,7 @@ mod state;
 mod style;
 mod utils;
 
-use anyhow::Result;
+use anyhow::{Result, Context};
 use clap::{Args, Parser, Subcommand};
 use commands::*;
 use config::Config;
@@ -126,11 +126,11 @@ fn main() {
 }
 
 fn cli() -> Result<()> {
-    let config = Config::build()?;
+    let config = Config::build().context("Could not load program configuration.")?;
 
-    setup(&config)?;
+    setup(&config).context("Could not prepare the program database.")?;
 
-    let mut state = State::build(&config)?;
+    let mut state = State::build(&config).context("Could not load the program state.")?;
 
     let cli = Cli::parse();
 
@@ -142,12 +142,12 @@ fn cli() -> Result<()> {
             let default_task = "".to_string();
             let task = task.unwrap_or(&default_task);
 
-            start_task(task, target_time, &state)?;
+            start_task(task, target_time, &state).context("Could not start task.")?;
         }
         Subcommands::Out { at } => {
             let target_time = at.as_ref().map(|at| parse(at)).transpose()?;
 
-            stop_task(target_time, &mut state)?;
+            stop_task(target_time, &mut state).context("Could not stop task.")?;
         }
         Subcommands::Display {
             json,
@@ -165,7 +165,7 @@ fn cli() -> Result<()> {
                 filter_by_date,
                 ids,
                 &state,
-            )?;
+            ).context("Could not display tasks.")?;
         }
         Subcommands::Month {
             json,
@@ -173,17 +173,17 @@ fn cli() -> Result<()> {
             month,
             sheet,
         } => {
-            display_month(json, ids, month.as_ref(), sheet.as_ref(), &mut state)?;
+            display_month(json, ids, month.as_ref(), sheet.as_ref(), &mut state).context("Could not display months")?;
         }
         Subcommands::Sheet { name, rename } => match rename {
-            None => checkout_sheet(name, &mut state)?,
-            Some(new_name) => rename_sheet(name, new_name, &mut state)?,
+            None => checkout_sheet(name, &mut state).context("Could not checkout sheet.")?,
+            Some(new_name) => rename_sheet(name, new_name, &mut state).context("Could not rename sheet.")?,
         },
         Subcommands::List => {
-            list_sheets(&state)?;
+            list_sheets(&state).context("Could not list sheets.")?;
         }
         Subcommands::Current => {
-            current_task(&state)?;
+            current_task(&state).context("Could not get current task.")?;
         }
         Subcommands::Edit {
             id,
@@ -192,13 +192,13 @@ fn cli() -> Result<()> {
             move_to,
             notes,
         } => {
-            edit_task(id, start, end, move_to, notes, &mut state)?;
+            edit_task(id, start, end, move_to, notes, &mut state).context("Could not edit task.")?;
         }
         Subcommands::Kill { kill_args } => {
             if let Some(id) = &kill_args.id {
-                kill_task(id, &mut state)?;
+                kill_task(id, &mut state).context("Could not delete this task.")?;
             } else if let Some(sheet) = &kill_args.sheet {
-                kill_sheet(sheet, &mut state)?;
+                kill_sheet(sheet, &mut state).context("Could not delete the timesheet.")?;
             }
         }
     };
