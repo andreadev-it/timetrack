@@ -23,7 +23,7 @@ pub fn kill_task(id: &usize, state: &mut State) -> Result<()> {
     let entry = entry.unwrap();
 
     if !confirm_action(&format!(
-        "Are you sure you want to remove entry {}?",
+        "Are you sure you want to remove entry {} (y/N)?",
         entry.name
     )) {
         return Ok(());

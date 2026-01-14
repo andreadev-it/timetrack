@@ -73,8 +73,7 @@ to its first non-ambiguous letter. For example,
 - [x] Add the "month" command as an alias for display
 - [x] Check for edge cases (e.g. all sheets removed)
 - [x] Improve code quality
-- [ ] Add errors contexts
+- [x] Add errors contexts
 - [ ] Add tests
 - [ ] Write docs
 - [ ] Publish on crates.io
-
