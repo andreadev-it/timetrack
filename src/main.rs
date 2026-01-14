@@ -33,6 +33,10 @@ enum Subcommands {
         /// The time and date this task was started. "15 minutes ago" and similar are also ok
         #[arg(short, long)]
         at: Option<String>,
+        /// If a task is currently ongoing, it ends it and starts a new task.
+        /// If the "at" parameter is used, it will switch to the new task at that specific time
+        #[arg(short, long)]
+        switch: bool
     },
     /// Checks out of the current timesheet
     Out {
@@ -135,14 +139,14 @@ fn cli() -> Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Subcommands::In { task, at } => {
+        Subcommands::In { task, at, switch } => {
             let target_time = at.as_ref().map(|at| parse(at)).transpose()?;
 
             let task = task.as_ref();
             let default_task = "".to_string();
             let task = task.unwrap_or(&default_task);
 
-            start_task(task, target_time, &state)?;
+            start_task(task, target_time, switch, &state)?;
         }
         Subcommands::Out { at } => {
             let target_time = at.as_ref().map(|at| parse(at)).transpose()?;
